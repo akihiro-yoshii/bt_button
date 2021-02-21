@@ -11,7 +11,8 @@ Installation
 
 .. code-block::
 
-   $ pip install -r requirements.txt
+   $ wget https://github.com/akihiro-yoshii/bt_button/releases/download/v0.1.3/bt_button-0.1-py3-none-any.whl
+   $ pip install bt_button-0.1-py3-none-any.whl
 
 How to use
 ----------
@@ -20,7 +21,7 @@ You can get button instance and register callback function as below.
 
 .. code-block:: python
 
-   import bt_button.bt_button as bt_button
+   import bt_button
 
    button = bt_button.AbShutter()
    button.add_released_listener(released)
