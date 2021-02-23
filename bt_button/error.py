@@ -4,6 +4,7 @@ class Error(Exception):
 
 
 class DeviceNotFoundError(Error):
-    def __init__(self, message, device_name):
+    def __init__(self, message, name, mac_addr):
         self.message = message
-        self.device_name = device_name
+        self.name = name
+        self.mac_addr = mac_addr

@@ -3,41 +3,40 @@ import logging
 import threading
 import evdev
 
-from .error import DeviceNotFoundError
-from ._device_manager import _dev_mgr
+from ._device_manager import open_device
 
 
-def open_device(device_name):
-    path = _dev_mgr.search_device(device_name)
-    if path is None:
-        raise DeviceNotFoundError("Device not found:", device_name)
+class AbShutter:
+    def __init__(self, mac_addr):
+        self.mac_addr = mac_addr
+        self.device = None
 
-    return _dev_mgr.open_device(path)
-
-
-class AbShutter(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True)
-
-        self.device = open_device("AB Shutter3")
-        self.name = "[AB Shutter]"
+        self.name = "AB Shutter3"
 
         self.pushed_funcs = []
         self.released_funcs = []
 
         logging.info("{}: initialized".format(self.name))
 
-    def run(self):
-        for event in self.device.read_loop():
-            self.event(event)
+    def is_connected(self):
+        return self.device is not None
 
-    def event(self, e):
-        logging.debug(e)
+    def connect(self):
+        self.device = open_device(self.name, self.mac_addr)
+        logging.info("{}: connected".format(self.name))
 
-        if e.type == evdev.events.EV_KEY:
-            self.key_event(e)
+        self.thread = threading.Thread(target=self._run)
+        self.thread.setDaemon(True)
+        self.thread.start()
 
-    def key_event(self, e):
+    def _run(self):
+        for e in self.device.read_loop():
+            logging.debug(e)
+
+            if e.type == evdev.events.EV_KEY:
+                self._key_event(e)
+
+    def _key_event(self, e):
         if (e.code, e.value) in [(115, 1), (28, 1)]:
             logging.info("{}: pushed.".format(self.name))
             for f in self.pushed_funcs:
@@ -59,36 +58,44 @@ class AbShutter(threading.Thread):
         self.released_funcs.append(func)
 
 
-class BTselfie(threading.Thread):
-    def __init__(self):
+class BTselfie:
+    def __init__(self, mac_addr):
         """
-        Create instance of BTselfie and connect to the button.
+        Create instance of BTselfie.
 
-        Raises
+        Parameters
         -------
-        bt_button.DeviceNotFoundError
-            Raises DeviceNotFoundError if the button is not found.
+        mac_addr
+            BTselfie's MAC Address
         """
-        super().__init__(daemon=True)
+        self.mac_addr = mac_addr
+        self.device = None
 
-        self.device = open_device("BTselfie E")
-        self.name = "[BT selfie ]"
+        self.name = "BTselfie E"
 
         self.clicked_funcs = []
 
         logging.info("{}: initialized".format(self.name))
 
-    def run(self):
-        for event in self.device.read_loop():
-            self.event(event)
+    def is_connected(self):
+        return self.device is not None
 
-    def event(self, e):
-        logging.debug(e)
+    def connect(self):
+        self.device = open_device(self.name, self.mac_addr)
+        logging.info("{}: connected".format(self.name))
 
-        if e.type == evdev.events.EV_KEY:
-            self.key_event(e)
+        self.thread = threading.Thread(target=self._run)
+        self.thread.setDaemon(True)
+        self.thread.start()
 
-    def key_event(self, e):
+    def _run(self):
+        for e in self.device.read_loop():
+            logging.debug(e)
+
+            if e.type == evdev.events.EV_KEY:
+                self._key_event(e)
+
+    def _key_event(self, e):
         if (e.code, e.value) == (115, 0):
             logging.info("{}: clicked.".format(self.name))
             for f in self.clicked_funcs:
