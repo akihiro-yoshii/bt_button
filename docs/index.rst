@@ -11,8 +11,8 @@ Installation
 
 .. code-block::
 
-   $ wget https://github.com/akihiro-yoshii/bt_button/releases/download/v0.1.3/bt_button-0.1-py3-none-any.whl
-   $ pip install bt_button-0.1-py3-none-any.whl
+   $ wget https://github.com/akihiro-yoshii/bt_button/releases/download/v0.2.0/bt_button-0.2-py3-none-any.whl
+   $ pip install bt_button-0.2-py3-none-any.whl
 
 How to use
 ----------
@@ -23,9 +23,9 @@ You can get button instance and register callback function as below.
 
    import bt_button
 
-   button = bt_button.AbShutter()
+   button = bt_button.AbShutter([MAC ADDRESS])
    button.add_released_listener(released)
-   button.start()
+   button.connect()
 
    def released(event):
        print(event)
