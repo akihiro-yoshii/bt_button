@@ -3,7 +3,7 @@ import logging
 import threading
 import evdev
 
-from ._device_manager import open_device
+from ._device_manager import open_device, remove_device
 
 
 class AbShutter:
@@ -30,11 +30,17 @@ class AbShutter:
         self.thread.start()
 
     def _run(self):
-        for e in self.device.read_loop():
-            logging.debug(e)
+        path = self.device.path
+        try:
+            for e in self.device.read_loop():
+                logging.debug(e)
 
-            if e.type == evdev.events.EV_KEY:
-                self._key_event(e)
+                if e.type == evdev.events.EV_KEY:
+                    self._key_event(e)
+        except OSError as e:
+            self.device = None
+            remove_device(path)
+            logging.info("{}: disconnected".format(self.name))
 
     def _key_event(self, e):
         if (e.code, e.value) in [(115, 1), (28, 1)]:
@@ -89,11 +95,18 @@ class BTselfie:
         self.thread.start()
 
     def _run(self):
-        for e in self.device.read_loop():
-            logging.debug(e)
+        path = self.device.path
+        try:
+            for e in self.device.read_loop():
+                logging.debug(e)
 
-            if e.type == evdev.events.EV_KEY:
-                self._key_event(e)
+                if e.type == evdev.events.EV_KEY:
+                    self._key_event(e)
+
+        except OSError as e:
+            self.device = None
+            remove_device(path)
+            logging.info("{}: disconnected".format(self.name))
 
     def _key_event(self, e):
         if (e.code, e.value) == (115, 0):

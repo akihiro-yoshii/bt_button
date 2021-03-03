@@ -26,3 +26,8 @@ def open_device(name, mac_addr):
     connected_paths.append(device.path)
 
     return device
+
+
+def remove_device(path):
+
+    connected_paths.remove(path)
