@@ -2,7 +2,7 @@
 
 name: pytest
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
@@ -24,18 +24,19 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
-          
+
       - name: Install dependencies
         run: |
+          sudo apt-get install libglib2.0-dev
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-mock
-          
+
       # Runs a single command using the runners shell
       - name: Pytest
         run: pytest
