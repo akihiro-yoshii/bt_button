@@ -12,7 +12,9 @@ Installation
 .. code-block::
 
    $ wget https://github.com/akihiro-yoshii/bt_button/releases/download/v0.2.0/bt_button-0.2-py3-none-any.whl
+   # apt install libglib2.0-dev
    $ pip install bt_button-0.2-py3-none-any.whl
+
 
 How to use
 ----------
