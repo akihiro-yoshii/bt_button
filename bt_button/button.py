@@ -11,6 +11,14 @@ from ._device_manager import open_device, remove_device
 
 class AbShutter:
     def __init__(self, mac_addr):
+        """
+        Create instance of AbShutter.
+
+        Parameters
+        ----------
+        mac_addr
+            AbShutter's MAC Address
+        """
         self.mac_addr = mac_addr
         self.device = None
 
@@ -22,9 +30,15 @@ class AbShutter:
         logging.info("{}: initialized".format(self.name))
 
     def is_connected(self):
+        """
+        Returns True if device is connected
+        """
         return self.device is not None
 
     def connect(self):
+        """
+        Connect to device and start to listen button event
+        """
         self.device = open_device(self.name, self.mac_addr)
         logging.info("{}: connected".format(self.name))
 
@@ -87,9 +101,15 @@ class BTselfie:
         logging.info("{}: initialized".format(self.name))
 
     def is_connected(self):
+        """
+        Returns True if device is connected
+        """
         return self.device is not None
 
     def connect(self):
+        """
+        Connect to device and start to listen button event
+        """
         self.device = open_device(self.name, self.mac_addr)
         logging.info("{}: connected".format(self.name))
 
@@ -138,6 +158,14 @@ class BTselfie:
 
 class SmartPalette:
     def __init__(self, mac_addr):
+        """
+        Create instance of BTselfie.
+
+        Parameters
+        -------
+        mac_addr
+            BTselfie's MAC Address
+        """
         self.mac_addr = mac_addr
         self.device = None
 
@@ -149,9 +177,15 @@ class SmartPalette:
         logging.info("{}: initialized".format(self.name))
 
     def is_connected(self):
+        """
+        Returns True if device is connected
+        """
         return self.device is not None
 
     def connect(self):
+        """
+        Connect to device and start to listen button event
+        """
         class MyDelegate(btle.DefaultDelegate):
             def __init__(self, func):
                 btle.DefaultDelegate.__init__(self)
@@ -172,6 +206,9 @@ class SmartPalette:
         self.thread.start()
 
     def disconnect(self):
+        """
+        Disconnect to device and stop to listen button event
+        """
         if not self.is_connected():
             return
 
