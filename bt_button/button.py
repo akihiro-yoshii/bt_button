@@ -10,22 +10,22 @@ from ._device_manager import open_device, remove_device
 
 
 class AbShutter:
-    def __init__(self, mac_addr):
-        """
-        Create instance of AbShutter.
+    """
+    Create instance of AbShutter.
 
-        Parameters
-        ----------
-        mac_addr
-            AbShutter's MAC Address
-        """
+    Parameters
+    ----------
+    mac_addr
+        AbShutter's MAC Address
+    """
+    def __init__(self, mac_addr):
         self.mac_addr = mac_addr
         self.device = None
 
         self.name = "AB Shutter3"
 
-        self.pushed_funcs = []
-        self.released_funcs = []
+        self.pushed_func = None
+        self.released_func = None
 
         logging.info("{}: initialized".format(self.name))
 
@@ -46,6 +46,42 @@ class AbShutter:
         self.thread.setDaemon(True)
         self.thread.start()
 
+    def attach_pushed_listener(self, func):
+        """
+        Attach function that be called when button pushed.
+
+        Parameters
+        ----------
+        func : function(e)
+            This function will be called with evdev.events.InputEvent
+            when button be clicked.
+        """
+        self.pushed_func = func
+
+    def detach_pushed_listener(self):
+        """
+        Detach function that be called when button pushed.
+        """
+        self.pushed_func = None
+
+    def attach_released_listener(self, func):
+        """
+        Attach function that be called when button released.
+
+        Parameters
+        ----------
+        func : function(e)
+            This function will be called with evdev.events.InputEvent
+            when button be clicked.
+        """
+        self.released_func = func
+
+    def detach_released_listener(self):
+        """
+        Detach function that be called when button pushed.
+        """
+        self.released_func = None
+
     def _run(self):
         path = self.device.path
         try:
@@ -54,7 +90,7 @@ class AbShutter:
 
                 if e.type == evdev.events.EV_KEY:
                     self._key_event(e)
-        except OSError as e:
+        except OSError:
             self.device = None
             remove_device(path)
             logging.info("{}: disconnected".format(self.name))
@@ -62,41 +98,33 @@ class AbShutter:
     def _key_event(self, e):
         if (e.code, e.value) in [(115, 1), (28, 1)]:
             logging.info("{}: pushed.".format(self.name))
-            for f in self.pushed_funcs:
-                f(e)
+            self.pushed_func(e)
         else:
             pass
 
         if (e.code, e.value) in [(115, 0), (28, 0)]:
             logging.info("{}: released.".format(self.name))
-            for f in self.released_funcs:
-                f(e)
+            self.released_func(e)
         else:
             pass
 
-    def add_pushed_listener(self, func):
-        self.pushed_funcs.append(func)
-
-    def add_released_listener(self, func):
-        self.released_funcs.append(func)
-
 
 class BTselfie:
-    def __init__(self, mac_addr):
-        """
-        Create instance of BTselfie.
+    """
+    Create instance of BTselfie.
 
-        Parameters
-        -------
-        mac_addr
-            BTselfie's MAC Address
-        """
+    Parameters
+    -------
+    mac_addr
+        BTselfie's MAC Address
+    """
+    def __init__(self, mac_addr):
         self.mac_addr = mac_addr
         self.device = None
 
         self.name = "BTselfie E Keyboard"
 
-        self.clicked_funcs = []
+        self.clicked_func = None
 
         logging.info("{}: initialized".format(self.name))
 
@@ -117,6 +145,24 @@ class BTselfie:
         self.thread.setDaemon(True)
         self.thread.start()
 
+    def attach_clicked_listener(self, func):
+        """
+        Attach function that be called when button clicked.
+
+        Parameters
+        ----------
+        func : function(e)
+            This function will be called with evdev.events.InputEvent
+            when button be clicked.
+        """
+        self.clicked_func = func
+
+    def detach_clicked_listener(self):
+        """
+        Detach function that be called when button clicked.
+        """
+        self.clicked_func = None
+
     def _run(self):
         path = self.device.path
         try:
@@ -126,7 +172,7 @@ class BTselfie:
                 if e.type == evdev.events.EV_KEY:
                     self._key_event(e)
 
-        except OSError as e:
+        except OSError:
             self.device = None
             remove_device(path)
             logging.info("{}: disconnected".format(self.name))
@@ -134,37 +180,20 @@ class BTselfie:
     def _key_event(self, e):
         if (e.code, e.value) == (28, 0):
             logging.info("{}: clicked.".format(self.name))
-            for f in self.clicked_funcs:
-                f(e)
+            self.clicked_func(e)
         else:
             pass
-
-    def add_clicked_listener(self, func):
-        """
-        Register function that be called when button clicked.
-
-        Parameters
-        ----------
-        func : function(e)
-            This function will be called with evdev.events.InputEvent
-            when button be clicked.
-
-        Returns
-        -------
-        None
-        """
-        self.clicked_funcs.append(func)
 
 
 class SmartPalette:
     def __init__(self, mac_addr):
         """
-        Create instance of BTselfie.
+        Create instance of SmartPalette.
 
         Parameters
         -------
         mac_addr
-            BTselfie's MAC Address
+            SmartPalette's MAC Address
         """
         self.mac_addr = mac_addr
         self.device = None
@@ -230,7 +259,7 @@ class SmartPalette:
                     break
                 self.device.waitForNotifications(0.5)
 
-        except btle.BTLEDisconnectError as e:
+        except btle.BTLEDisconnectError:
             self.device = None
             logging.info("{}: disconnected".format(self.name))
 

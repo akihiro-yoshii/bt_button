@@ -8,8 +8,12 @@ def ab_shutter(mocker):
     return AbShutter("00:00:00:00:00:00")
 
 
-def test_add_pushed_listener(mocker, ab_shutter):
+def test_attach_pushed_listener_0(mocker, ab_shutter):
     func = mocker.Mock()
-    ab_shutter.add_pushed_listener(func)
+    ab_shutter.attach_pushed_listener(func)
 
-    assert len(ab_shutter.pushed_funcs) == 1
+    assert ab_shutter.pushed_func is not None
+
+
+def test_attach_pushed_listener_1(mocker, ab_shutter):
+    assert ab_shutter.pushed_func is None
