@@ -3,8 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to bt_button's documentation!
-=====================================
+.. toctree::
+   :hidden:
+
+   self
+   device_setup
+   bt_button
+
+Overview
+========
+
+This package supports to get event of bluetooth device for your application.
+
 
 Installation
 ------------
@@ -45,13 +55,6 @@ Sample Implementation
 ---------------------
 
 https://github.com/akihiro-yoshii/bt_button_app/blob/main/main.py
-
-.. toctree::
-   :maxdepth: 4
-   :caption: API References:
-
-   bt_button
-
 
 Indices and tables
 ==================
