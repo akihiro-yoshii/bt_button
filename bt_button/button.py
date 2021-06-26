@@ -94,7 +94,7 @@ class BTselfie:
         self.mac_addr = mac_addr
         self.device = None
 
-        self.name = "BTselfie E"
+        self.name = "BTselfie E Keyboard"
 
         self.clicked_funcs = []
 
@@ -132,7 +132,7 @@ class BTselfie:
             logging.info("{}: disconnected".format(self.name))
 
     def _key_event(self, e):
-        if (e.code, e.value) == (115, 0):
+        if (e.code, e.value) == (28, 0):
             logging.info("{}: clicked.".format(self.name))
             for f in self.clicked_funcs:
                 f(e)
