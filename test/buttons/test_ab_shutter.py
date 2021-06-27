@@ -1,5 +1,5 @@
 import pytest
-from bt_button import AbShutter
+from bt_button import AbShutter, AbShutterButtonEvent
 
 
 @pytest.fixture
@@ -9,45 +9,33 @@ def ab_shutter(mocker):
     return AbShutter("00:00:00:00:00:00")
 
 
-def test_attach_pushed_listener_0(mocker, ab_shutter):
+@pytest.mark.parametrize("event", list(AbShutterButtonEvent))
+def test_attach_button_event_listener_0(mocker, ab_shutter, event):
     func = mocker.Mock()
-    ab_shutter.attach_pushed_listener(func)
 
-    assert ab_shutter.pushed_func is not None
+    ab_shutter.attach_button_event_listener(event, func)
+    assert ab_shutter.button_event_funcs[event] == func
+
+    for other_event in list(AbShutterButtonEvent):
+        if other_event != event:
+            assert ab_shutter.button_event_funcs[other_event] is None
 
 
-def test_attach_pushed_listener_1(mocker, ab_shutter):
-    assert ab_shutter.pushed_func is None
+def test_attach_button_event_listener_1(mocker, ab_shutter):
+    for event in list(AbShutterButtonEvent):
+        assert ab_shutter.button_event_funcs[event] is None
 
 
-def test_detach_pushed_listener_0(mocker, ab_shutter):
+@pytest.mark.parametrize("event", list(AbShutterButtonEvent))
+def test_detach_button_event_listener_0(mocker, ab_shutter, event):
     func = mocker.Mock()
-    ab_shutter.attach_pushed_listener(func)
 
-    assert ab_shutter.pushed_func == func
+    for e in list(AbShutterButtonEvent):
+        ab_shutter.attach_button_event_listener(e, func)
 
-    ab_shutter.detach_pushed_listener()
+    ab_shutter.detach_button_event_listener(event)
+    assert ab_shutter.button_event_funcs[event] is None
 
-    assert ab_shutter.pushed_func is None
-
-
-def test_attach_released_listener_0(mocker, ab_shutter):
-    func = mocker.Mock()
-    ab_shutter.attach_released_listener(func)
-
-    assert ab_shutter.released_func is not None
-
-
-def test_attach_released_listener_1(mocker, ab_shutter):
-    assert ab_shutter.released_func is None
-
-
-def test_detach_released_listener_0(mocker, ab_shutter):
-    func = mocker.Mock()
-    ab_shutter.attach_released_listener(func)
-
-    assert ab_shutter.released_func == func
-
-    ab_shutter.detach_released_listener()
-
-    assert ab_shutter.released_func is None
+    for other_event in list(AbShutterButtonEvent):
+        if other_event != event:
+            assert ab_shutter.button_event_funcs[other_event] == func

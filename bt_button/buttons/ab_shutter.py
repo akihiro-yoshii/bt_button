@@ -2,8 +2,15 @@ import logging
 import threading
 
 import evdev
+from enum import IntEnum
 
 from ._device_manager import open_device, remove_device
+
+
+class AbShutterButtonEvent(IntEnum):
+    PUSHED = 1
+    RELEASED = 0
+    KEEP = 2
 
 
 class AbShutter:
@@ -21,8 +28,9 @@ class AbShutter:
 
         self.name = "AB Shutter3"
 
-        self.pushed_func = None
-        self.released_func = None
+        self.button_event_funcs = {}
+        for button_event in list(AbShutterButtonEvent):
+            self.button_event_funcs[button_event] = None
 
         logging.info("{}: initialized".format(self.name))
 
@@ -43,41 +51,25 @@ class AbShutter:
         self.thread.setDaemon(True)
         self.thread.start()
 
-    def attach_pushed_listener(self, func):
+    def attach_button_event_listener(self, button_event, func):
         """
         Attach function that be called when button pushed.
 
         Parameters
         ----------
+        button_event : ABShutterButtonEvent
+            Enum to identify target event
         func : function(e)
             This function will be called with evdev.events.InputEvent
-            when button be clicked.
+            when target event happened.
         """
-        self.pushed_func = func
+        self.button_event_funcs[button_event] = func
 
-    def detach_pushed_listener(self):
+    def detach_button_event_listener(self, button_event):
         """
-        Detach function that be called when button pushed.
+        Detach function that be called when button event happened.
         """
-        self.pushed_func = None
-
-    def attach_released_listener(self, func):
-        """
-        Attach function that be called when button released.
-
-        Parameters
-        ----------
-        func : function(e)
-            This function will be called with evdev.events.InputEvent
-            when button be clicked.
-        """
-        self.released_func = func
-
-    def detach_released_listener(self):
-        """
-        Detach function that be called when button pushed.
-        """
-        self.released_func = None
+        self.button_event_funcs[button_event] = None
 
     def _run(self):
         path = self.device.path
@@ -93,14 +85,16 @@ class AbShutter:
             logging.info("{}: disconnected".format(self.name))
 
     def _key_event(self, e):
+        event = AbShutterButtonEvent(e.value)
+
         if (e.code, e.value) in [(115, 1), (28, 1)]:
             logging.info("{}: pushed.".format(self.name))
-            self.pushed_func(e)
-        else:
-            pass
 
         if (e.code, e.value) in [(115, 0), (28, 0)]:
             logging.info("{}: released.".format(self.name))
-            self.released_func(e)
-        else:
-            pass
+
+        if (e.code, e.value) in [(115, 2), (28, 2)]:
+            logging.info("{}: keep.".format(self.name))
+
+        if self.button_event_funcs[event] is not None:
+            self.button_event_funcs[event](e)
