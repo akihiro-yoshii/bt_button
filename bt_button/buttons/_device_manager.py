@@ -1,5 +1,5 @@
 import evdev
-from .error import DeviceNotFoundError
+from .. import DeviceNotFoundError
 
 
 connected_paths = []
