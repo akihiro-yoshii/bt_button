@@ -51,6 +51,11 @@ class AbShutter:
         self.thread.setDaemon(True)
         self.thread.start()
 
+    def _disconnect(self):
+        remove_device(self.device.path)
+        self.device = None
+        logging.info("{}: disconnected".format(self.name))
+
     def attach_button_event_listener(self, button_event, func):
         """
         Attach function that be called when button pushed.
@@ -72,7 +77,6 @@ class AbShutter:
         self.button_event_funcs[button_event] = None
 
     def _run(self):
-        path = self.device.path
         try:
             for e in self.device.read_loop():
                 logging.debug(e)
@@ -80,9 +84,7 @@ class AbShutter:
                 if e.type == evdev.events.EV_KEY:
                     self._key_event(e)
         except OSError:
-            self.device = None
-            remove_device(path)
-            logging.info("{}: disconnected".format(self.name))
+            self._disconnect()
 
     def _key_event(self, e):
         event = AbShutterButtonEvent(e.value)
