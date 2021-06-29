@@ -5,10 +5,10 @@ import signal
 import struct
 
 from bluepy import btle
-from enum import Enum
+from enum import IntEnum
 
 
-class SmartPaletteButton(Enum):
+class SmartPaletteButton(IntEnum):
     BEIGE = 3
     YELLOW = 4
     ORANGE = 5
