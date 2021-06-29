@@ -39,3 +39,34 @@ def test_detach_button_event_listener_0(mocker, ab_shutter, event):
     for other_event in list(AbShutterButtonEvent):
         if other_event != event:
             assert ab_shutter.button_event_funcs[other_event] == func
+
+
+@pytest.mark.parametrize("key_event", list(AbShutterButtonEvent))
+def test_key_event_call_only_target_func(mocker, ab_shutter, key_event):
+    correct_func = mocker.Mock()
+    mistake_func = mocker.Mock()
+
+    for e in list(AbShutterButtonEvent):
+        if e == key_event:
+            ab_shutter.attach_button_event_listener(e, correct_func)
+        else:
+            ab_shutter.attach_button_event_listener(e, mistake_func)
+
+    event = type("hoge", (object,), {
+        "code": 115,
+        "value": key_event,
+    })
+    ab_shutter._key_event(event)
+
+    correct_func.assert_called_once_with(event)
+    mistake_func.assert_not_called()
+
+
+@pytest.mark.parametrize("key_event", list(AbShutterButtonEvent))
+def test_key_event_with_any_func(ab_shutter, key_event):
+
+    event = type("hoge", (object,), {
+        "code": 115,
+        "value": key_event,
+    })
+    ab_shutter._key_event(event)
