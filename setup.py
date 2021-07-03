@@ -6,7 +6,7 @@ setup(
     description="Bluetooth Button Wrapper",
     install_requires=[
         "evdev",
-        "bluepy"
+        "pygatt",
     ],
     packages=['bt_button'],
 )

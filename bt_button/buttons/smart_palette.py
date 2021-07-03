@@ -1,10 +1,7 @@
 import logging
-import threading
-import sys
-import signal
 import struct
 
-from bluepy import btle
+import pygatt
 from enum import Enum
 
 log = logging.getLogger(__name__)
@@ -51,9 +48,6 @@ class SmartPalette:
         for button in list(SmartPaletteButton):
             self.pushed_funcs[button] = None
 
-        signal.signal(signal.SIGINT, self._terminate)
-        signal.signal(signal.SIGTERM, self._terminate)
-
         log.info("{}: initialized".format(self.name))
 
     def is_connected(self):
@@ -66,24 +60,16 @@ class SmartPalette:
         """
         Connect to device and start to listen button event
         """
-        class MyDelegate(btle.DefaultDelegate):
-            def __init__(self, func):
-                btle.DefaultDelegate.__init__(self)
-                self.func = func
+        self.adapter = pygatt.GATTToolBackend()
 
-            def handleNotification(self, handle, data):
-                self.func(data)
-
-        self.device = btle.Peripheral(self.mac_addr, "random")
-        self.device.setDelegate(MyDelegate(self._event))
-
-        self.device.writeCharacteristic(0x000c, b'\x01\x00', True)
-
-        self.break_flag = False
+        self.adapter.start()
+        self.device = self.adapter.connect(
+            self.mac_addr, address_type=pygatt.BLEAddressType.random)
         log.info("{}: connected".format(self.name))
 
-        self.thread = threading.Thread(target=self._run)
-        self.thread.start()
+        # self.device.char_write_handle(12, bytearray([0x01, 0x00]))
+        self.device.subscribe("6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+                              callback=self._event)
 
     def disconnect(self):
         """
@@ -92,11 +78,9 @@ class SmartPalette:
         if not self.is_connected():
             return
 
-        self.break_flag = True
-        self.thread.join()
-
         self.device.disconnect()
         self.device = None
+        self.adapter.stop()
         log.info("{}: disconnected".format(self.name))
 
     def attach_pushed_listener(self, button, func):
@@ -118,22 +102,7 @@ class SmartPalette:
         """
         self.pushed_funcs[button] = None
 
-    def _terminate(self, signum, frame):
-        self.disconnect()
-        sys.exit(0)
-
-    def _run(self):
-        try:
-            while True:
-                if self.break_flag:
-                    break
-                self.device.waitForNotifications(0.5)
-
-        except btle.BTLEDisconnectError:
-            self.device = None
-            logging.info("{}: disconnected".format(self.name))
-
-    def _event(self, data):
+    def _event(self, _, data):
         decoded_data = struct.unpack('5sb', data)[0].decode()
         button_number = int(decoded_data.replace("PIN", ""))
         button = SmartPaletteButton(button_number)

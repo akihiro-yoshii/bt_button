@@ -54,7 +54,7 @@ def test_event_call_only_target_func(mocker, smart_palette, target_button):
 
     data_str = "PIN{:02}".format(target_button.value)
     data = struct.pack("5s", data_str.encode('utf-8')) + b'\x00'
-    smart_palette._event(data)
+    smart_palette._event(0xb, data)
 
     correct_func.assert_called_once()
     mistake_func.assert_not_called()
