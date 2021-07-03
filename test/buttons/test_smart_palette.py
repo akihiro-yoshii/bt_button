@@ -1,6 +1,6 @@
 import pytest
-import struct
 from bt_button import SmartPalette, SmartPaletteButton
+from bt_button.buttons.smart_palette import _button_to_data
 
 
 @pytest.fixture
@@ -52,8 +52,7 @@ def test_event_call_only_target_func(mocker, smart_palette, target_button):
         else:
             smart_palette.attach_pushed_listener(b, mistake_func)
 
-    data_str = "PIN{:02}".format(target_button.value)
-    data = struct.pack("5s", data_str.encode('utf-8')) + b'\x00'
+    data = _button_to_data(target_button)
     smart_palette._event(0xb, data)
 
     correct_func.assert_called_once()

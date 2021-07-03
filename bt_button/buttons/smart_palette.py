@@ -29,6 +29,17 @@ class SmartPaletteButton(Enum):
     BIG_BUTTON = 12
 
 
+def _data_to_button(data):
+    decoded_data = struct.unpack('5sb', data)[0].decode()
+    button_number = int(decoded_data.replace("PIN", ""))
+    return SmartPaletteButton(button_number)
+
+
+def _button_to_data(button):
+    data_str = "PIN{:02}".format(button.value)
+    return struct.pack("5s", data_str.encode('utf-8')) + b'\x00'
+
+
 class SmartPalette:
     def __init__(self, mac_addr):
         """
@@ -103,9 +114,7 @@ class SmartPalette:
         self.pushed_funcs[button] = None
 
     def _event(self, _, data):
-        decoded_data = struct.unpack('5sb', data)[0].decode()
-        button_number = int(decoded_data.replace("PIN", ""))
-        button = SmartPaletteButton(button_number)
+        button = _data_to_button(data)
 
         log.info("{} : pushed.".format(button))
         if self.pushed_funcs[button] is not None:
