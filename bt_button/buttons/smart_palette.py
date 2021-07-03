@@ -7,6 +7,7 @@ import struct
 from bluepy import btle
 from enum import Enum
 
+log = logging.getLogger(__name__)
 
 
 class SmartPaletteButton(Enum):
@@ -53,7 +54,7 @@ class SmartPalette:
         signal.signal(signal.SIGINT, self._terminate)
         signal.signal(signal.SIGTERM, self._terminate)
 
-        logging.info("{}: initialized".format(self.name))
+        log.info("{}: initialized".format(self.name))
 
     def is_connected(self):
         """
@@ -74,12 +75,12 @@ class SmartPalette:
                 self.func(data)
 
         self.device = btle.Peripheral(self.mac_addr, "random")
-        logging.info("{}: connected".format(self.name))
         self.device.setDelegate(MyDelegate(self._event))
 
         self.device.writeCharacteristic(0x000c, b'\x01\x00', True)
 
         self.break_flag = False
+        log.info("{}: connected".format(self.name))
 
         self.thread = threading.Thread(target=self._run)
         self.thread.start()
@@ -96,7 +97,7 @@ class SmartPalette:
 
         self.device.disconnect()
         self.device = None
-        logging.info("{}: disconnected".format(self.name))
+        log.info("{}: disconnected".format(self.name))
 
     def attach_pushed_listener(self, button, func):
         """
@@ -137,6 +138,6 @@ class SmartPalette:
         button_number = int(decoded_data.replace("PIN", ""))
         button = SmartPaletteButton(button_number)
 
-        logging.info("{} : pushed.".format(button))
+        log.info("{} : pushed.".format(button))
         if self.pushed_funcs[button] is not None:
             self.pushed_funcs[button]()
