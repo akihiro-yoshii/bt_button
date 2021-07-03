@@ -52,7 +52,7 @@ def test_event_call_only_target_func(mocker, smart_palette, target_button):
         else:
             smart_palette.attach_pushed_listener(b, mistake_func)
 
-    data_str = "PIN{:02}".format(int(target_button))
+    data_str = "PIN{:02}".format(target_button.value)
     data = struct.pack("5s", data_str.encode('utf-8')) + b'\x00'
     smart_palette._event(data)
 
