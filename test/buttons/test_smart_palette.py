@@ -57,3 +57,9 @@ def test_event_call_only_target_func(mocker, smart_palette, target_button):
 
     correct_func.assert_called_once()
     mistake_func.assert_not_called()
+
+
+@pytest.mark.parametrize("target_button", list(SmartPaletteButton))
+def test_event_with_any_func(mocker, smart_palette, target_button):
+    data = _button_to_data(target_button)
+    smart_palette._event(0xb, data)
