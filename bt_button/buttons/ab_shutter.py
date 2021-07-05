@@ -6,6 +6,7 @@ from enum import Enum
 
 from ._device_manager import open_device, remove_device
 
+log = logging.getLogger(__name__)
 
 
 class AbShutterButtonEvent(Enum):
@@ -38,10 +39,10 @@ class AbShutter:
         for button in list(AbShutterButton):
             self.button_event_funcs[button] = {}
 
-        logging.info("{}: initialized".format(self.name))
             for event in list(AbShutterButtonEvent):
                 self.button_event_funcs[button][event] = None
 
+        log.info("{}: initialized".format(self.name))
 
     def is_connected(self):
         """
@@ -54,7 +55,7 @@ class AbShutter:
         Connect to device and start to listen button event
         """
         self.device = open_device(self.name, self.mac_addr)
-        logging.info("{}: connected".format(self.name))
+        log.info("{}: connected".format(self.name))
 
         self.thread = threading.Thread(target=self._run)
         self.thread.setDaemon(True)
@@ -63,7 +64,7 @@ class AbShutter:
     def _disconnect(self):
         remove_device(self.device.path)
         self.device = None
-        logging.info("{}: disconnected".format(self.name))
+        log.info("{}: disconnected".format(self.name))
 
     def attach_button_event_listener(self, button, event, func):
         """
@@ -90,7 +91,7 @@ class AbShutter:
     def _run(self):
         try:
             for e in self.device.read_loop():
-                logging.debug(e)
+                log.debug(e)
 
                 if e.type == evdev.events.EV_KEY:
                     self._key_event(e)
@@ -101,7 +102,7 @@ class AbShutter:
         button = AbShutterButton(e.code)
         event = AbShutterButtonEvent(e.value)
 
-        logging.info("[{}] {}: {}".format(self.name, button, event))
+        log.info("[{}] {}: {}".format(self.name, button, event))
 
         if self.button_event_funcs[button][event] is not None:
             self.button_event_funcs[button][event](e)
