@@ -1,11 +1,64 @@
 import pytest
-from bt_button import SmartPalette, SmartPaletteButton
+from bt_button import SmartPalette, SmartPaletteButton, DeviceNotFoundError
 from bt_button.buttons.smart_palette import _button_to_data
+
+import pygatt
 
 
 @pytest.fixture
 def smart_palette(mocker):
+    mocker.patch('pygatt.GATTToolBackend')
     return SmartPalette("00:00:00:00:00:00")
+
+
+def test_is_connected_0(mocker, smart_palette):
+    mock = mocker.Mock()
+    smart_palette.device = mock
+    assert smart_palette.is_connected()
+
+
+def test_is_connected_1(mocker, smart_palette):
+    assert not smart_palette.is_connected()
+
+
+def test_connect_0(mocker, smart_palette):
+    adapter_mock = mocker.patch.object(smart_palette.adapter, 'connect')
+
+    smart_palette.connect()
+
+    adapter_mock.assert_called_once()
+
+
+def test_connect_1(mocker, smart_palette):
+    adapter_mock = mocker.patch.object(
+        smart_palette.adapter, 'connect',
+        side_effect=pygatt.exceptions.NotConnectedError)
+
+    with pytest.raises(DeviceNotFoundError):
+        smart_palette.connect()
+
+    adapter_mock.assert_called_once()
+
+
+def test_disconnect_0(mocker, smart_palette):
+    smart_palette.device = mocker.Mock()
+    device_mock = mocker.patch.object(smart_palette.device, 'disconnect')
+
+    smart_palette.disconnect()
+
+    device_mock.assert_called_once()
+
+
+def test_disconnect_1(mocker, smart_palette):
+    is_connected_mock = mocker.patch.object(smart_palette, 'is_connected')
+    is_connected_mock.return_value = False
+
+    smart_palette.device = mocker.Mock()
+    device_mock = mocker.patch.object(smart_palette.device, 'disconnect')
+
+    smart_palette.disconnect()
+
+    device_mock.assert_not_called()
 
 
 @pytest.mark.parametrize("target_button", list(SmartPaletteButton))

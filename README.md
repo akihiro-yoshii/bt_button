@@ -9,3 +9,10 @@ https://bt-button.readthedocs.io/
 ```
 $ sphinx-build -a ./docs ./html
 ```
+
+
+## test
+
+```
+$ pytest --cov=bt_button --cov-branch --cov-report=term-missing --cov-report=html
+```

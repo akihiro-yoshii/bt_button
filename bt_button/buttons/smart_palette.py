@@ -4,6 +4,8 @@ import struct
 import pygatt
 from enum import Enum
 
+from .. import DeviceNotFoundError
+
 log = logging.getLogger(__name__)
 
 
@@ -59,6 +61,10 @@ class SmartPalette:
         for button in list(SmartPaletteButton):
             self.pushed_funcs[button] = None
 
+        self.adapter = pygatt.GATTToolBackend()
+
+        self.adapter.start()
+
         log.info("{}: initialized".format(self.name))
 
     def is_connected(self):
@@ -71,11 +77,15 @@ class SmartPalette:
         """
         Connect to device and start to listen button event
         """
-        self.adapter = pygatt.GATTToolBackend()
+        try:
+            self.device = self.adapter.connect(
+                self.mac_addr,
+                address_type=pygatt.BLEAddressType.random,
+            )
+        except pygatt.exceptions.NotConnectedError:
+            raise DeviceNotFoundError(
+                "Device not found:", self.name, self.mac_addr)
 
-        self.adapter.start()
-        self.device = self.adapter.connect(
-            self.mac_addr, address_type=pygatt.BLEAddressType.random)
         log.info("{}: connected".format(self.name))
 
         # self.device.char_write_handle(12, bytearray([0x01, 0x00]))
