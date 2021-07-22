@@ -77,6 +77,7 @@ class BTselfie:
     def _key_event(self, e):
         if (e.code, e.value) == (28, 0):
             logging.info("{}: clicked.".format(self.name))
-            self.clicked_func(e)
+            if self.clicked_func is not None:
+                self.clicked_func(e)
         else:
             pass
