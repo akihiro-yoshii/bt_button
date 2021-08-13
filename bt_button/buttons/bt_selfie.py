@@ -2,8 +2,17 @@ import logging
 import threading
 
 import evdev
+from enum import Enum
 
 from ._device_manager import open_device, remove_device
+
+
+class BtSelfieButtonEvent(Enum):
+    CLICKED = 0
+
+
+class BtSelfieButton(Enum):
+    CENTER = 28
 
 
 class BTselfie:
@@ -21,7 +30,12 @@ class BTselfie:
 
         self.name = "BTselfie E Keyboard"
 
-        self.clicked_func = None
+        self.button_event_funcs = {}
+        for button in list(BtSelfieButton):
+            self.button_event_funcs[button] = {}
+
+            for event in list(BtSelfieButtonEvent):
+                self.button_event_funcs[button][event] = None
 
         logging.info("{}: initialized".format(self.name))
 
@@ -42,7 +56,12 @@ class BTselfie:
         self.thread.setDaemon(True)
         self.thread.start()
 
-    def attach_clicked_listener(self, func):
+    def _disconnect(self):
+        remove_device(self.device.path)
+        self.device = None
+        logging.info("{}: disconnected".format(self.name))
+
+    def attach_button_event_listener(self, button, event, func):
         """
         Attach function that be called when button clicked.
 
@@ -52,13 +71,13 @@ class BTselfie:
             This function will be called with evdev.events.InputEvent
             when button be clicked.
         """
-        self.clicked_func = func
+        self.button_event_funcs[button][event] = func
 
-    def detach_clicked_listener(self):
+    def detach_button_event_listener(self, button, event):
         """
         Detach function that be called when button clicked.
         """
-        self.clicked_func = None
+        self.button_event_funcs[button][event] = None
 
     def _run(self):
         path = self.device.path
@@ -70,14 +89,12 @@ class BTselfie:
                     self._key_event(e)
 
         except OSError:
-            self.device = None
-            remove_device(path)
-            logging.info("{}: disconnected".format(self.name))
+            self._disconnect()
 
     def _key_event(self, e):
-        if (e.code, e.value) == (28, 0):
-            logging.info("{}: clicked.".format(self.name))
-            if self.clicked_func is not None:
-                self.clicked_func(e)
-        else:
-            pass
+        button = BtSelfieButton(e.code)
+        event = BtSelfieButtonEvent(e.value)
+
+        logging.info("{}: clicked.".format(self.name))
+        if self.button_event_funcs[button][event] is not None:
+            self.button_event_funcs[button][event](e)
