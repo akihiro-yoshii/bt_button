@@ -5,7 +5,8 @@ from ._event_device import EventDevice
 
 
 class BtSelfieButtonEvent(Enum):
-    CLICKED = 0
+    PUSHED = 1
+    RELEASED = 0
 
 
 class BtSelfieButton(Enum):
