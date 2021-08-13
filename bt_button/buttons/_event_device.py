@@ -13,12 +13,21 @@ class EventDevice:
         self.name = name
 
     def is_connected(self):
+        logging.warning(
+            "Please use is_monitoring() instead of is_connected().")
+        return self.is_monitoring()
+
+    def is_monitoring(self):
         """
         Returns True if device is connected
         """
         return self.device is not None
 
     def connect(self):
+        logging.warning("Please use start_monitor() instead of connect().")
+        self.start_monitor()
+
+    def start_monitor(self):
         self.device = open_device(self.name, self.mac_addr)
         logging.info("{}: connected".format(self.name))
 
@@ -26,7 +35,7 @@ class EventDevice:
         self.thread.setDaemon(True)
         self.thread.start()
 
-    def _disconnect(self):
+    def _finish_monitor(self):
         remove_device(self.device.path)
         self.device = None
         logging.info("{}: disconnected".format(self.name))
@@ -40,4 +49,4 @@ class EventDevice:
                     self._key_event(e)
 
         except OSError:
-            self._disconnect()
+            self._finish_monitor()
