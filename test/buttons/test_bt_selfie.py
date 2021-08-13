@@ -21,7 +21,7 @@ def test_is_connected_1(mocker, bt_selfie):
 
 def test_connect_0(mocker, bt_selfie):
     open_device_mock = mocker.patch(
-        "bt_button.buttons.bt_selfie.open_device")
+        "bt_button.buttons._event_device.open_device")
 
     bt_selfie.connect()
 
@@ -30,7 +30,7 @@ def test_connect_0(mocker, bt_selfie):
 
 def test_connect_1(mocker, bt_selfie):
     open_device_mock = mocker.patch(
-        "bt_button.buttons.bt_selfie.open_device")
+        "bt_button.buttons._event_device.open_device")
     open_device_mock.side_effect = DeviceNotFoundError(
         "hoge", bt_selfie.name, bt_selfie.mac_addr)
 
@@ -85,8 +85,8 @@ def test_run_0(mocker, bt_selfie, button, event):
     })
 
     bt_selfie.device = mocker.Mock()
-    adapter_mock = mocker.patch.object(
-        bt_selfie.device, 'read_loop', return_value=[event_mock,])
+    mocker.patch.object(
+        bt_selfie.device, 'read_loop', return_value=[event_mock, ])
 
     target_func = mocker.Mock()
     bt_selfie.attach_button_event_listener(button, event, target_func)
@@ -99,12 +99,10 @@ def test_run_0(mocker, bt_selfie, button, event):
 @pytest.mark.parametrize("button", list(BtSelfieButton))
 @pytest.mark.parametrize("event", list(BtSelfieButtonEvent))
 def test_run_1(mocker, bt_selfie, button, event):
-    open_device_mock = mocker.patch(
-        "bt_button.buttons.bt_selfie.remove_device")
+    mocker.patch("bt_button.buttons._event_device.remove_device")
 
     bt_selfie.device = mocker.Mock()
-    adapter_mock = mocker.patch.object(
-        bt_selfie.device, 'read_loop', side_effect=OSError)
+    mocker.patch.object(bt_selfie.device, 'read_loop', side_effect=OSError)
 
     target_func = mocker.Mock()
     bt_selfie.attach_button_event_listener(button, event, target_func)
@@ -122,8 +120,8 @@ def test_run_2(mocker, bt_selfie, button, event):
     })
 
     bt_selfie.device = mocker.Mock()
-    adapter_mock = mocker.patch.object(
-        bt_selfie.device, 'read_loop', return_value=[event_mock,])
+    mocker.patch.object(
+        bt_selfie.device, 'read_loop', return_value=[event_mock, ])
 
     target_func = mocker.Mock()
     bt_selfie.attach_button_event_listener(button, event, target_func)

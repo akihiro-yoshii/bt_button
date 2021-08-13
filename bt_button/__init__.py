@@ -7,7 +7,7 @@ from .buttons.smart_palette import SmartPalette, SmartPaletteButton
 
 __all__ = [
     "AbShutter", "AbShutterButton", "AbShutterButtonEvent",
-    "BTselfie",
+    "BTselfie", "BtSelfieButton", "BtSelfieButtonEvent",
     "SmartPalette", "SmartPaletteButton",
     "Error", "DeviceNotFoundError"
 ]
