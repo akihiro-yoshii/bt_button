@@ -57,6 +57,13 @@ class AbShutter(EventDevice):
     def detach_button_event_listener(self, button, event):
         """
         Detach function that be called when button event happened.
+
+        Parameters
+        ----------
+        button : AbShutterButton
+            Enum to identify target button
+        event : AbShutterButtonEvent
+            Enum to identify target event
         """
         self.button_event_funcs[button][event] = None
 

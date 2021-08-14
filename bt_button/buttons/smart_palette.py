@@ -1,11 +1,13 @@
 import logging
 import struct
-
-import pygatt
 from enum import Enum
+import pygatt
 
 from .. import DeviceNotFoundError
 
+DEFAULT_CONNECT_TIMEOUT = 5.0
+
+logging.getLogger("pygatt").setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
 
 
@@ -73,14 +75,20 @@ class SmartPalette:
         """
         return self.device is not None
 
-    def connect(self):
+    def connect(self, timeout=DEFAULT_CONNECT_TIMEOUT):
         """
         Connect to device and start to listen button event
+
+        Parameters
+        -------
+        timeout : integer
+            Wait time for connection
         """
         try:
             self.device = self.adapter.connect(
                 self.mac_addr,
                 address_type=pygatt.BLEAddressType.random,
+                timeout=timeout
             )
         except pygatt.exceptions.NotConnectedError:
             raise DeviceNotFoundError(
@@ -120,6 +128,11 @@ class SmartPalette:
     def detach_pushed_listener(self, button):
         """
         Detach function that be called when button clicked.
+
+        Parameters
+        ----------
+        button : SmartPaletteButton
+            Enum to identify target button.
         """
         self.pushed_funcs[button] = None
 

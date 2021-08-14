@@ -3,6 +3,8 @@ from enum import Enum
 
 from ._event_device import EventDevice
 
+log = logging.getLogger(__name__)
+
 
 class BtSelfieButtonEvent(Enum):
     PUSHED = 1
@@ -40,6 +42,10 @@ class BTselfie(EventDevice):
 
         Parameters
         ----------
+        button : BtSelfieButton
+            Enum to identify target button.
+        event : BtSelfieButtonEvent
+            Enum to identify target event.
         func : function(e)
             This function will be called with evdev.events.InputEvent
             when button be clicked.
@@ -49,6 +55,13 @@ class BTselfie(EventDevice):
     def detach_button_event_listener(self, button, event):
         """
         Detach function that be called when button clicked.
+
+        Parameters
+        ----------
+        button : BtSelfieButton
+            Enum to identify target button.
+        event : BtSelfieButtonEvent
+            Enum to identify target event.
         """
         self.button_event_funcs[button][event] = None
 
