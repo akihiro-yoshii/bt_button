@@ -4,8 +4,6 @@ from bt_button import AbShutter, AbShutterButton, AbShutterButtonEvent
 
 @pytest.fixture
 def ab_shutter(mocker):
-    mocker.patch("bt_button.buttons._device_manager.open_device",
-                 return_value=1)
     return AbShutter("00:00:00:00:00:00")
 
 
