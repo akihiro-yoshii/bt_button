@@ -4,7 +4,6 @@ import evdev
 
 from .. import DeviceNotFoundError
 
-
 connected_paths = []
 
 
