@@ -53,7 +53,7 @@ And you can get below result.
 Sample Implementation
 ---------------------
 
-https://github.com/akihiro-yoshii/bt_button_app/blob/main/main.py
+Please refer sample/main.py
 
 Indices and tables
 ==================
