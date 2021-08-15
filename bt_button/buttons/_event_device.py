@@ -2,36 +2,7 @@ import logging
 import threading
 import evdev
 
-from .. import DeviceNotFoundError
-
-connected_paths = []
-
-
-def _search_device(name, mac_addr):
-    devs = evdev.util.list_devices()
-    for dev_path in devs:
-        if dev_path in connected_paths:
-            continue
-
-        dev = evdev.InputDevice(dev_path)
-        if dev.name == name and dev.uniq == mac_addr:
-            return dev
-
-    return None
-
-
-def open_device(name, mac_addr):
-    device = _search_device(name, mac_addr.lower())
-    if device is None:
-        raise DeviceNotFoundError("Device not found:", name, mac_addr)
-
-    connected_paths.append(device.path)
-
-    return device
-
-
-def remove_device(path):
-    connected_paths.remove(path)
+from ._event_device_manager import EventDeviceManager
 
 
 class EventDevice:
@@ -57,7 +28,7 @@ class EventDevice:
         self.start_monitor()
 
     def start_monitor(self):
-        self.device = open_device(self.name, self.mac_addr)
+        self.device = EventDeviceManager.open_device(self.name, self.mac_addr)
         logging.info("{}: connected".format(self.name))
 
         self.thread = threading.Thread(target=self._run)
@@ -65,7 +36,7 @@ class EventDevice:
         self.thread.start()
 
     def _finish_monitor(self):
-        remove_device(self.device.path)
+        EventDeviceManager.remove_device(self.device.path)
         self.device = None
         logging.info("{}: disconnected".format(self.name))
 
