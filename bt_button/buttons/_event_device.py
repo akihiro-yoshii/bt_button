@@ -13,6 +13,15 @@ class EventDevice:
         self.name = name
 
     def is_connected(self):
+        """
+        Deprecated function.
+
+        Event device connection managed by OS,
+        and this module can't control connection status.
+
+        This function returns only monitoring or not.
+        So please don't use this function.
+        """
         logging.warning(
             "Please use is_monitoring() instead of is_connected().")
         return self.is_monitoring()
@@ -24,10 +33,22 @@ class EventDevice:
         return self.device is not None
 
     def connect(self):
+        """
+        Deprecated function.
+
+        Event device connection managed by OS,
+        and this module can't control connection status.
+
+        This function manages only to start monitoring.
+        So please don't use this function.
+        """
         logging.warning("Please use start_monitor() instead of connect().")
         self.start_monitor()
 
     def start_monitor(self):
+        """
+        Start monitoring event device
+        """
         self.device = EventDeviceManager.open_device(self.name, self.mac_addr)
         logging.info("{}: connected".format(self.name))
 
